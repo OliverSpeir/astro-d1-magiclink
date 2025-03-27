@@ -1,0 +1,8 @@
+name = "astro-d1-magiclink"
+compatibility_date = "2025-03-26"
+pages_build_output_dir = "./dist"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "magic-links-prod"
+database_id = "02022cc7-a6bc-41dd-8a44-f3b757d8a49e"

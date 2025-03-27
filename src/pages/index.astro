@@ -1,0 +1,65 @@
+---
+export const prerender = false;
+import { actions } from "astro:actions";
+import Layout from "@components/Layout.astro";
+
+const { user, session } = Astro.locals;
+if (!session || !user) {
+  return Astro.redirect("/login");
+}
+const result = Astro.getActionResult(actions.auth.signout);
+if (result?.data) {
+  return Astro.redirect("/login");
+}
+---
+
+<Layout>
+  <div>
+    <section>
+      <h1>Hello</h1>
+      <p>You are logged in as <span>{user.email}</span></p>
+      <form method="POST" action={actions.auth.signout}>
+        <button>Sign Out</button>
+      </form>
+    </section>
+  </div>
+  <style>
+    div {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    section {
+      background-color: #fff;
+      border-radius: 8px;
+      padding: 2rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 2rem;
+    }
+
+    button {
+      padding: 0.75rem 1.5rem;
+      background-color: #003469;
+      border: none;
+      border-radius: 4px;
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #012244;
+    }
+
+    span {
+      font-weight: bold;
+      color: #0073e6;
+    }
+  </style>
+</Layout>
