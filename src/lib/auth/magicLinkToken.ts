@@ -7,10 +7,7 @@ export async function createMagicLinkToken(
   email: string,
   runtime: ActionAPIContext["locals"]["runtime"]
 ) {
-  // Generate a raw token using the consistent method
   const rawToken = generateToken();
-
-  // Hash it for storage
   const tokenId = await sha256Hash(rawToken);
 
   const now = Math.floor(Date.now() / 1000);
@@ -26,7 +23,6 @@ export async function createMagicLinkToken(
     .bind(tokenId, userId, email, expiresAt, now)
     .run();
 
-  // Return the raw token to be used in magic link URL
   return rawToken;
 }
 
@@ -34,7 +30,6 @@ export async function validateMagicLinkToken(
   rawToken: string,
   runtime: ActionAPIContext["locals"]["runtime"]
 ) {
-  // Hash the raw token for lookup
   const tokenId = await sha256Hash(rawToken);
 
   const result = await runtime.env.DB.prepare(
@@ -76,14 +71,3 @@ export async function getLatestMagicLinkTokenForUser(
   return result as MagicLinkToken | null;
 }
 
-// maybe useful on a cron or something if we care
-export async function cleanupExpiredTokens(
-  runtime: ActionAPIContext["locals"]["runtime"]
-) {
-  const now = Math.floor(Date.now() / 1000);
-  await runtime.env.DB.prepare(
-    "DELETE FROM magic_link_token WHERE expires_at < ?"
-  )
-    .bind(now)
-    .run();
-}
