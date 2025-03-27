@@ -3,7 +3,7 @@ import type { APIRoute } from "astro";
 import {
   validateMagicLinkToken,
   markEmailAsVerified,
-  generateSessionToken,
+  generateToken,
   createSession,
   setSessionTokenCookie,
   deleteUserEmailCookie,
@@ -23,7 +23,7 @@ export const GET: APIRoute = async (context) => {
 
   await markEmailAsVerified(tokenData.userId, context.locals.runtime);
 
-  const rawSessionToken = generateSessionToken();
+  const rawSessionToken = generateToken();
   const session = await createSession(
     rawSessionToken,
     tokenData.userId,

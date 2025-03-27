@@ -9,10 +9,10 @@ export function bufferToHex(buffer: ArrayBuffer | Uint8Array) {
 }
 
 /**
- * Generates a cryptographically secure random session token
+ * Generates a cryptographically secure random token
  * Using URL-safe base64 encoding (RFC 4648 § 5)
  */
-export function generateSessionToken() {
+export function generateToken() {
   const bytes = new Uint8Array(32);
   crypto.getRandomValues(bytes);
   const base64 = btoa(String.fromCharCode(...bytes));

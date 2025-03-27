@@ -1,12 +1,18 @@
 import type { ActionAPIContext } from "astro:actions";
 import type { MagicLinkToken } from "./types";
+import { generateToken, sha256Hash } from "./utils";
 
 export async function createMagicLinkToken(
   userId: string,
   email: string,
   runtime: ActionAPIContext["locals"]["runtime"]
 ) {
-  const tokenId = crypto.randomUUID();
+  // Generate a raw token using the consistent method
+  const rawToken = generateToken();
+
+  // Hash it for storage
+  const tokenId = await sha256Hash(rawToken);
+
   const now = Math.floor(Date.now() / 1000);
   const expiresAt = now + 900; // 15 minutes
 
@@ -20,13 +26,17 @@ export async function createMagicLinkToken(
     .bind(tokenId, userId, email, expiresAt, now)
     .run();
 
-  return tokenId;
+  // Return the raw token to be used in magic link URL
+  return rawToken;
 }
 
 export async function validateMagicLinkToken(
-  tokenId: string,
+  rawToken: string,
   runtime: ActionAPIContext["locals"]["runtime"]
 ) {
+  // Hash the raw token for lookup
+  const tokenId = await sha256Hash(rawToken);
+
   const result = await runtime.env.DB.prepare(
     "SELECT user_id, email, expires_at FROM magic_link_token WHERE id = ?"
   )
@@ -71,7 +81,6 @@ export async function cleanupExpiredTokens(
   runtime: ActionAPIContext["locals"]["runtime"]
 ) {
   const now = Math.floor(Date.now() / 1000);
-
   await runtime.env.DB.prepare(
     "DELETE FROM magic_link_token WHERE expires_at < ?"
   )
