@@ -108,3 +108,16 @@ button:disabled {
   font: inherit;
   text-decoration: underline;
 }
+.post-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.post-actions form {
+  flex: 1;
+}
+
+.post-actions button {
+  width: 100%;
+}

@@ -71,3 +71,18 @@ export async function getLatestMagicLinkTokenForUser(
   return result as MagicLinkToken | null;
 }
 
+export async function shouldRateLimitMagicLinkToken(
+  userId: string,
+  limitSeconds: number = 30,
+  runtime: ActionAPIContext["locals"]["runtime"]
+) {
+  const now = Math.floor(Date.now() / 1000);
+
+  const recentToken = await getLatestMagicLinkTokenForUser(userId, runtime);
+
+  if (recentToken && now < recentToken.created_at + limitSeconds) {
+    return true;
+  }
+
+  return false;
+}

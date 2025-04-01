@@ -1,0 +1,26 @@
+---
+export interface Props {
+  submittedEmail: string | null;
+}
+
+const { submittedEmail } = Astro.props;
+---
+
+<form method="POST">
+  <label>
+    Email:
+    <input
+      type="email"
+      name="email"
+      autocomplete="email"
+      value={submittedEmail}
+      required
+    />
+  </label>
+  <div>
+    <button type="submit" name="formType" value="signup">
+      Create Account
+    </button>
+    <button type="submit" name="formType" value="signin"> Sign In </button>
+  </div>
+</form>
