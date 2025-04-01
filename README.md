@@ -37,6 +37,4 @@ Inspired / based on [Lucia-auth basic API](https://lucia-auth.com/sessions/basic
 
 ## Notes
 
-This is my first project with Astro actions, and they are fun but there was a few times during this I thought "why am I doing all this when normal endpoints worked fine?" but I do like actions a lot, probably moreso for usage in browser. I wish an action could return a redirect directly like an endpoint can.
-
 This project made me excited for [Astro Sessions](https://docs.astro.build/en/reference/experimental-flags/sessions/) and things like [laravel's flash data](https://laravel.com/docs/12.x/session#flash-data)

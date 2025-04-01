@@ -1,42 +1,88 @@
 ---
 export const prerender = false;
 import Layout from "@components/Layout.astro";
-import { actions, isInputError } from "astro:actions";
-import { getUserEmailFromCookie, deleteUserEmailCookie } from "@auth";
+import "@styles/login.css";
+import {
+  getUserEmailFromCookie,
+  deleteUserEmailCookie,
+  setUserEmailCookie,
+} from "@auth";
+import { actions } from "astro:actions";
+import FormSubmitted from "@components/login/FormSubmitted.astro";
+import InitialForm from "@components/login/InitialForm.astro";
 
 const { user, session } = Astro.locals;
 if (session || user) {
   return Astro.redirect("/");
 }
 
-const signInResult = Astro.getActionResult(actions.auth.signin);
-const signUpResult = Astro.getActionResult(actions.auth.signup);
-const resendResult = Astro.getActionResult(actions.auth.resend);
-const clearEmailResult = Astro.getActionResult(actions.auth.clearEmail);
+let errorMessage = null;
+let successMessage = null;
+let savedEmail = getUserEmailFromCookie(Astro);
+let formAction = null;
 
 const invalidToken =
   Astro.url.searchParams.get("error") === "InvalidOrExpiredToken";
-
 if (invalidToken) {
   deleteUserEmailCookie(Astro);
 }
 
-const submittedEmail = getUserEmailFromCookie(Astro);
+if (Astro.request.method === "POST") {
+  try {
+    const formData = await Astro.request.formData();
+    const email = formData.get("email")?.toString() || "";
+    const requestType = formData.get("formType")?.toString();
+    formAction = requestType || null;
 
-const actionSubmitted = Boolean(
-  signInResult?.data || signUpResult?.data || resendResult?.data
-);
+    if (!email && requestType !== "clearEmail") {
+      errorMessage = "Email is required";
+    } else if (requestType === "clearEmail") {
+      await Astro.callAction(actions.auth.clearEmail, formData);
+      return Astro.redirect(Astro.url.pathname);
+    } else {
+      if (email) {
+        savedEmail = email;
+        setUserEmailCookie(Astro, email);
+      }
 
-if (clearEmailResult?.data) {
-  deleteUserEmailCookie(Astro);
-  return Astro.redirect(Astro.url.pathname);
+      let result;
+
+      switch (requestType) {
+        case "signin":
+          result = await Astro.callAction(actions.auth.signin, formData);
+          break;
+        case "signup":
+          result = await Astro.callAction(actions.auth.signup, formData);
+          break;
+        case "resend":
+          result = await Astro.callAction(actions.auth.resend, formData);
+          break;
+        default:
+          errorMessage = "Invalid form submission";
+      }
+
+      if (result) {
+        if (result.error) {
+          errorMessage = result.error.message;
+        }
+        if (result.data) {
+          successMessage = result.data;
+        }
+      }
+    }
+  } catch (error) {
+    // console.error(error);
+    errorMessage =
+      error instanceof Error ? error.message : "An unexpected error occurred";
+  }
 }
+
+const isEmailSent = successMessage !== null;
 ---
 
 <Layout>
   <main>
     <h1>Magic Link Auth</h1>
-
     {
       invalidToken && (
         <p aria-live="assertive" role="alert">
@@ -44,105 +90,24 @@ if (clearEmailResult?.data) {
         </p>
       )
     }
-
     {
-      signInResult?.error && (
+      errorMessage && (
         <div aria-live="assertive" role="alert">
-          {console.log(signInResult.error)}
-          {isInputError(signInResult.error)
-            ? Object.values(signInResult.error.fields)
-            : signInResult.error.message}
+          {errorMessage}
         </div>
       )
     }
     {
-      signUpResult?.error && (
-        <div aria-live="assertive" role="alert">
-          {isInputError(signUpResult.error)
-            ? Object.values(signUpResult.error.fields)
-            : signUpResult.error.message}
-        </div>
-      )
-    }
-    {
-      resendResult?.error && (
-        <div aria-live="assertive" role="alert">
-          {isInputError(resendResult.error)
-            ? Object.values(resendResult.error.fields)
-            : resendResult.error.message}
-        </div>
-      )
-    }
-
-    {
-      actionSubmitted ? (
-        <>
-          <div aria-live="polite" role="status">
-            {resendResult?.data ? (
-              <>
-                {resendResult?.data?.message}
-                {submittedEmail && <span>{submittedEmail}</span>}
-              </>
-            ) : (
-              <>
-                {signInResult?.data?.message || signUpResult?.data?.message}
-                {submittedEmail && <span>{submittedEmail}</span>}
-              </>
-            )}
-          </div>
-
-          <section>
-            <form method="POST">
-              <input type="hidden" name="email" value={submittedEmail} />
-              <div>
-                <button type="submit" formaction={actions.auth.signup}>
-                  Create Account
-                </button>
-                <button
-                  type="submit"
-                  formaction={actions.auth.resend}
-                  id="resend-btn"
-                >
-                  Resend Link
-                </button>
-              </div>
-            </form>
-
-            <div id="additional-options">
-              <form method="POST" action={actions.auth.clearEmail}>
-                <button type="submit">Use a different email</button>
-              </form>
-            </div>
-          </section>
-        </>
+      isEmailSent ? (
+        <FormSubmitted
+          formSuccess={successMessage}
+          submittedEmail={savedEmail}
+          lastAction={formAction}
+        />
       ) : (
-        <form method="POST">
-          <label>
-            Email:
-            <input
-              type="email"
-              name="email"
-              autocomplete="email"
-              value={submittedEmail}
-              required
-            />
-          </label>
-          <div>
-            <button type="submit" formaction={actions.auth.signup}>
-              Create Account
-            </button>
-            <button type="submit" formaction={actions.auth.signin}>
-              Sign In
-            </button>
-          </div>
-        </form>
+        <InitialForm submittedEmail={savedEmail} />
       )
     }
   </main>
-
-  <style>
-    @import "@styles/login.css";
-  </style>
-
   <script src="@modules/client/resendButtonCounter"></script>
 </Layout>

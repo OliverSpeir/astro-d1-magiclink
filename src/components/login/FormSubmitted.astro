@@ -1,0 +1,42 @@
+---
+export interface Props {
+  formSuccess: { message: string } | null;
+  submittedEmail: string | null;
+  lastAction: string | null;
+}
+
+const { formSuccess, submittedEmail, lastAction } = Astro.props;
+---
+
+<div aria-live="polite" role="status">
+  {formSuccess && formSuccess.message}
+  {submittedEmail && <span>{submittedEmail}</span>}
+</div>
+
+<section>
+  <div class="post-actions">
+    {/* Only show Create Account button if they were signing in */}
+    {
+      lastAction === "signin" && (
+        <form method="POST">
+          <input type="hidden" name="email" value={submittedEmail} />
+          <input type="hidden" name="formType" value="signup" />
+          <button type="submit">Create Account</button>
+        </form>
+      )
+    }
+
+    <form method="POST">
+      <input type="hidden" name="email" value={submittedEmail} />
+      <input type="hidden" name="formType" value="resend" />
+      <button type="submit" id="resend-btn"> Resend Link </button>
+    </form>
+  </div>
+
+  <div id="additional-options">
+    <form method="POST">
+      <input type="hidden" name="formType" value="clearEmail" />
+      <button type="submit">Use a different email</button>
+    </form>
+  </div>
+</section>

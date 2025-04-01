@@ -4,3 +4,4 @@ export * from "./session";
 export * from "./user";
 export * from "./magicLinkToken";
 export * from "./cookie";
+export * from "./config";

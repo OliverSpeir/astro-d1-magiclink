@@ -7,14 +7,13 @@ import {
   deleteSessionTokenCookie,
   invalidateSession,
   sha256Hash,
-  getLatestMagicLinkTokenForUser,
   setUserEmailCookie,
   deleteUserEmailCookie,
+  shouldRateLimitMagicLinkToken,
+  BLOCKED_EMAILS,
+  ALLOWED_EMAILS,
 } from "@auth";
 import { sendMagicLinkEmail } from "@modules/server/sendEmail";
-
-const ALLOWED_EMAILS: string[] = [];
-const BLOCKED_EMAILS: string[] = [];
 
 export const auth = {
   signin: defineAction({
@@ -27,18 +26,19 @@ export const auth = {
 
       const user = await getUserByEmail(email, context.locals.runtime);
       if (user) {
-        const now = Math.floor(Date.now() / 1000);
-        const recentToken = await getLatestMagicLinkTokenForUser(
+        const shouldRateLimit = await shouldRateLimitMagicLinkToken(
           user.id,
+          30,
           context.locals.runtime
         );
-        if (recentToken && now < recentToken.created_at + 30) {
+
+        if (shouldRateLimit) {
           throw new ActionError({
             code: "TOO_MANY_REQUESTS",
-            message:
-              "A sign-in link was recently sent. Please wait 30 seconds before requesting a new link.",
+            message: "Please wait 30 seconds and try again.",
           });
         }
+
         const tokenId = await createMagicLinkToken(
           user.id,
           user.email,
@@ -89,8 +89,35 @@ export const auth = {
       }
 
       let user = await getUserByEmail(email, context.locals.runtime);
-      if (!user) {
+
+      if (user) {
+        const shouldRateLimit = await shouldRateLimitMagicLinkToken(
+          user.id,
+          30,
+          context.locals.runtime
+        );
+
+        if (shouldRateLimit) {
+          throw new ActionError({
+            code: "TOO_MANY_REQUESTS",
+            message: "Please wait 30 seconds and try again.",
+          });
+        }
+      } else {
         user = await createUser(email, context.locals.runtime);
+
+        const shouldRateLimit = await shouldRateLimitMagicLinkToken(
+          user.id,
+          30,
+          context.locals.runtime
+        );
+
+        if (shouldRateLimit) {
+          throw new ActionError({
+            code: "TOO_MANY_REQUESTS",
+            message: "Please wait 30 seconds and try again.",
+          });
+        }
       }
 
       const tokenId = await createMagicLinkToken(
@@ -131,18 +158,19 @@ export const auth = {
 
       const user = await getUserByEmail(email, context.locals.runtime);
       if (user) {
-        const now = Math.floor(Date.now() / 1000);
-        const recentToken = await getLatestMagicLinkTokenForUser(
+        const shouldRateLimit = await shouldRateLimitMagicLinkToken(
           user.id,
+          30,
           context.locals.runtime
         );
-        if (recentToken && now < recentToken.created_at + 30) {
+
+        if (shouldRateLimit) {
           throw new ActionError({
             code: "TOO_MANY_REQUESTS",
-            message:
-              "A sign-in link was recently sent. Please wait 30 seconds before resending.",
+            message: "Please wait 30 seconds and try again.",
           });
         }
+
         const tokenId = await createMagicLinkToken(
           user.id,
           user.email,
