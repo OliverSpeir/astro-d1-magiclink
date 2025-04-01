@@ -10,6 +10,7 @@ import {
 import { actions } from "astro:actions";
 import FormSubmitted from "@components/login/FormSubmitted.astro";
 import InitialForm from "@components/login/InitialForm.astro";
+import Templates from "@components/login/Templates.astro";
 
 const { user, session } = Astro.locals;
 if (session || user) {
@@ -24,10 +25,12 @@ let formAction = null;
 const invalidToken =
   Astro.url.searchParams.get("error") === "InvalidOrExpiredToken";
 if (invalidToken) {
+  // not sure about deleting the cookie here, the original idea was to have this cookie track an in progress login attempt and no they have failed, we could offer to resend to the email connected to this cookie, but deleting here makes it a brand new attempt essentially
   deleteUserEmailCookie(Astro);
 }
 
 if (Astro.request.method === "POST") {
+  console.log("POST request");
   try {
     const formData = await Astro.request.formData();
     const email = formData.get("email")?.toString() || "";
@@ -81,6 +84,10 @@ const isEmailSent = successMessage !== null;
 ---
 
 <Layout>
+  {
+    /* script large enough we can assume it won't be inlined and thus it will be defered */
+  }
+  <script src="@modules/client/enhanceLoginFlow"></script>
   <main>
     <h1>Magic Link Auth</h1>
     {
@@ -109,5 +116,24 @@ const isEmailSent = successMessage !== null;
       )
     }
   </main>
-  <script src="@modules/client/resendButtonCounter"></script>
+  {/* Templates for cloning in the script  */}
+  <Templates />
+  <style is:global>
+    [role="alert"] {
+      color: #e53e3e;
+      margin-bottom: 1rem;
+      padding: 0.5rem;
+      border-radius: 0.25rem;
+      background-color: #fed7d7;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    form {
+      position: relative;
+    }
+  </style>
 </Layout>

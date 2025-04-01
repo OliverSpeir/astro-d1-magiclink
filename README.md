@@ -9,7 +9,6 @@ As it stands this is a pretty painfully slow implementation, if I do the zero js
 1. [Cloudflare D1](https://developers.cloudflare.com/d1/)
 2. [Resend](https://resend.com/)
 3. [Astro Actions](https://docs.astro.build/en/guides/actions/)
-4. [Astro Scoped Styles](https://docs.astro.build/en/guides/styling/#scoped-styles)
 5. [Astro on-demand rendering](https://docs.astro.build/en/guides/on-demand-rendering/)
 
 ## Walkthrough
@@ -17,7 +16,7 @@ As it stands this is a pretty painfully slow implementation, if I do the zero js
 - Creates an [`@auth`](./src/lib/auth/) API with useful functions, and requires zero deps.
 - Handles sessions within [middleware](./src/middleware.ts) for certain routes, but relies on those routes to protect themselves
 - Creates a set of actions ([actions.auth](./src/actions/auth.ts)) which use the [`@auth` API](./src/lib/auth)
-- Attempts to be [Progressive Enhancement](https://developer.mozilla.org/en-US/docs/Glossary/Progressive_Enhancement), meaning requires zero JS to work, meaning all actions are submit via html forms
+- Login is [Progressive Enhancement](https://developer.mozilla.org/en-US/docs/Glossary/Progressive_Enhancement), meaning requires zero JS to work
 - Attempts to rate limit emails in the [auth actions](./src/actions/auth.ts) based on the token createdAt time
 - Uses [schema.sql](./src/lib/db/schema.sql) and creates indexes in attempt to improve performance (didn't test if these help)
 - Attempts to provide opaque messaging to prevent enumeration attacks on existing accounts

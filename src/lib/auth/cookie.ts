@@ -59,8 +59,8 @@ export function deleteUserEmailCookie(
 }
 
 export function getUserEmailFromCookie(
-  context: APIContext | ActionAPIContext
-): string {
+  context: APIContext | ActionAPIContext | AstroGlobal
+) {
   const emailCookie = context.cookies.get("userEmail");
   return emailCookie?.value || "";
 }
