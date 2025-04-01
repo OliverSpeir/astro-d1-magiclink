@@ -2,6 +2,8 @@
 
 Inspired / based on [Lucia-auth basic API](https://lucia-auth.com/sessions/basic-api/) sqlite, with no ORM
 
+As it stands this is a pretty painfully slow implementation, if I do the zero js form submits without `.callAction()` its a roughly 15-25% faster (probably zod or maybe how the workers are split up), but still around 800ms. What I think is necessary to make this login flow not feel bad UX wise is call the actions from the client and show some optimistic messages or loading messages.
+
 ## Tech
 
 1. [Cloudflare D1](https://developers.cloudflare.com/d1/)
