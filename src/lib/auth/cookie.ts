@@ -62,5 +62,5 @@ export function getUserEmailFromCookie(
   context: APIContext | ActionAPIContext | AstroGlobal
 ) {
   const emailCookie = context.cookies.get("userEmail");
-  return emailCookie?.value || "";
+  return emailCookie?.value;
 }

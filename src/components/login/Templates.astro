@@ -1,17 +1,30 @@
-<template id="form-submitted-template">
+<template id="error-template">
+  <div role="alert" aria-live="assertive" class="visible"></div>
+</template>
+
+<template id="button-loading-template">
+  <span>Loading</span><span class="loading"></span>
+</template>
+
+<template id="signup-success-template">
   <div aria-live="polite" role="status">
-    <span data-message></span>
-    <span data-email></span>
+    <span data-role="message"></span>
+    <span data-role="email"></span>
   </div>
+
   <section>
     <div class="post-actions">
-      <div data-create-account-container></div>
       <form method="POST">
-        <input type="hidden" name="email" data-email-input />
+        <input type="hidden" name="email" value="" />
         <input type="hidden" name="formType" value="resend" />
         <button type="submit" id="resend-btn">Resend Link</button>
       </form>
+      <form method="POST">
+        <input type="hidden" name="email" value="" />
+        <button type="submit" name="formType" value="signin">Sign In</button>
+      </form>
     </div>
+
     <div id="additional-options">
       <form method="POST">
         <input type="hidden" name="formType" value="clearEmail" />
@@ -21,10 +34,32 @@
   </section>
 </template>
 
-<template id="create-account-template">
-  <form method="POST">
-    <input type="hidden" name="email" data-email-input />
-    <input type="hidden" name="formType" value="signup" />
-    <button type="submit">Create Account</button>
-  </form>
+<template id="signin-success-template">
+  <div aria-live="polite" role="status">
+    <span data-role="message"></span>
+    <span data-role="email"></span>
+  </div>
+
+  <section>
+    <div class="post-actions">
+      <form method="POST">
+        <input type="hidden" name="email" value="" />
+        <input type="hidden" name="formType" value="signup" />
+        <button type="submit">Create Account</button>
+      </form>
+
+      <form method="POST">
+        <input type="hidden" name="email" value="" />
+        <input type="hidden" name="formType" value="resend" />
+        <button type="submit" id="resend-btn">Resend Link</button>
+      </form>
+    </div>
+
+    <div id="additional-options">
+      <form method="POST">
+        <input type="hidden" name="formType" value="clearEmail" />
+        <button type="submit">Use a different email</button>
+      </form>
+    </div>
+  </section>
 </template>

@@ -8,6 +8,10 @@ body {
   min-height: 100vh;
 }
 
+form {
+  position: relative;
+}
+
 main {
   background-color: #fff;
   border-radius: 8px;
@@ -120,4 +124,20 @@ button:disabled {
 
 .post-actions button {
   width: 100%;
+}
+.loading::after {
+  animation: dots steps(1, end) 1s infinite;
+  content: "";
+}
+
+@keyframes dots {
+  0% {
+    content: ".";
+  }
+  25% {
+    content: "..";
+  }
+  50% {
+    content: "...";
+  }
 }

@@ -30,7 +30,6 @@ if (invalidToken) {
 }
 
 if (Astro.request.method === "POST") {
-  console.log("POST request");
   try {
     const formData = await Astro.request.formData();
     const email = formData.get("email")?.toString() || "";
@@ -74,20 +73,13 @@ if (Astro.request.method === "POST") {
       }
     }
   } catch (error) {
-    // console.error(error);
     errorMessage =
       error instanceof Error ? error.message : "An unexpected error occurred";
   }
 }
-
-const isEmailSent = successMessage !== null;
 ---
 
 <Layout>
-  {
-    /* script large enough we can assume it won't be inlined and thus it will be defered */
-  }
-  <script src="@modules/client/enhanceLoginFlow"></script>
   <main>
     <h1>Magic Link Auth</h1>
     {
@@ -105,35 +97,22 @@ const isEmailSent = successMessage !== null;
       )
     }
     {
-      isEmailSent ? (
+      savedEmail ? (
         <FormSubmitted
           formSuccess={successMessage}
+          formError={errorMessage}
           submittedEmail={savedEmail}
           lastAction={formAction}
         />
       ) : (
-        <InitialForm submittedEmail={savedEmail} />
+        <>
+          <script src="@modules/client/loginComponent" />
+          <login-component>
+            <InitialForm />
+          </login-component>
+          <Templates />
+        </>
       )
     }
   </main>
-  {/* Templates for cloning in the script  */}
-  <Templates />
-  <style is:global>
-    [role="alert"] {
-      color: #e53e3e;
-      margin-bottom: 1rem;
-      padding: 0.5rem;
-      border-radius: 0.25rem;
-      background-color: #fed7d7;
-    }
-
-    button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    form {
-      position: relative;
-    }
-  </style>
 </Layout>

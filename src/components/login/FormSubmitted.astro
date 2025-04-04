@@ -1,11 +1,19 @@
 ---
 export interface Props {
   formSuccess: { message: string } | null;
+  formError: string | null;
   submittedEmail: string | null;
   lastAction: string | null;
 }
 
-const { formSuccess, submittedEmail, lastAction } = Astro.props;
+const { formSuccess, submittedEmail, lastAction, formError } = Astro.props;
+
+console.log(lastAction, formSuccess, formError, submittedEmail);
+
+// we lose track of if they are trying to signup or sign in if they resend twice
+// maybe another cookie to track this? or it is just the cost of having JS disabled haha
+
+// TO DO make these conditions easier to read
 ---
 
 <div aria-live="polite" role="status">
@@ -15,7 +23,6 @@ const { formSuccess, submittedEmail, lastAction } = Astro.props;
 
 <section>
   <div class="post-actions">
-    {/* Only show Create Account button if they were signing in */}
     {
       lastAction === "signin" && (
         <form method="POST">
@@ -26,11 +33,47 @@ const { formSuccess, submittedEmail, lastAction } = Astro.props;
       )
     }
 
-    <form method="POST">
-      <input type="hidden" name="email" value={submittedEmail} />
-      <input type="hidden" name="formType" value="resend" />
-      <button type="submit" id="resend-btn"> Resend Link </button>
-    </form>
+    {
+      (formError || !formSuccess) && lastAction !== "signin" && (
+        <form method="POST">
+          <input type="hidden" name="email" value={submittedEmail} />
+          <input type="hidden" name="formType" value="signup" />
+          <button type="submit">Create Account</button>
+        </form>
+      )
+    }
+
+    {
+      (formSuccess || formError) && lastAction !== "resend" && (
+        <form method="POST">
+          <input type="hidden" name="email" value={submittedEmail} />
+          <input type="hidden" name="formType" value="resend" />
+          <button type="submit" id="resend-btn">
+            Resend Link
+          </button>
+        </form>
+      )
+    }
+
+    {
+      formError && lastAction === "resend" && (
+        <form method="POST">
+          <input type="hidden" name="email" value={submittedEmail} />
+          <input type="hidden" name="formType" value="signin" />
+          <button type="submit">Sign In</button>
+        </form>
+      )
+    }
+
+    {
+      formSuccess && lastAction === "signup" && (
+        <form method="POST">
+          <input type="hidden" name="email" value={submittedEmail} />
+          <input type="hidden" name="formType" value="signin" />
+          <button type="submit">Sign In</button>
+        </form>
+      )
+    }
   </div>
 
   <div id="additional-options">
