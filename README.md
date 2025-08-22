@@ -1,6 +1,9 @@
 # Astro D1 Actions Magic Link Auth
 
-Inspired / based on [Lucia-auth basic API](https://lucia-auth.com/sessions/basic-api/) sqlite, with no ORM
+Inspired / based on [Lucia-auth basic API](https://lucia-auth.com/sessions/basic-api/) sqlite
+
+> [!WARNING]
+> I made this to explore actions, the lucia guide and D1, do not use this or magic links :)
 
 ## Tech
 
